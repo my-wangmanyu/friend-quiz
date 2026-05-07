@@ -240,6 +240,30 @@
     font-size: 12px;
     color: #c8bebe;
   }
+  .footer a { color: #c8bebe; text-decoration: none; }
+
+  /* 名字输入 */
+  .name-input-wrap { text-align: center; padding: 20px 0; }
+  .name-input-wrap input {
+    width: 80%; max-width: 260px; padding: 12px 16px;
+    border: 2px solid #f0e6e6; border-radius: 14px;
+    font-size: 16px; text-align: center; outline: none;
+    background: #fefcfc; color: var(--text);
+  }
+  .name-input-wrap input:focus { border-color: var(--primary); }
+
+  /* 排行榜 */
+  .leaderboard { text-align: left; }
+  .lb-item {
+    display: flex; align-items: center; padding: 10px 12px;
+    border-bottom: 1px solid #f5eeee; font-size: 14px;
+  }
+  .lb-rank { width: 30px; font-weight: 700; color: var(--primary); }
+  .lb-name { flex: 1; font-weight: 600; }
+  .lb-score { color: var(--accent); font-weight: 600; }
+  .lb-grade { font-size: 12px; color: var(--text-light); margin-left: 8px; }
+  .lb-time { font-size: 11px; color: #ccc; margin-left: 8px; }
+  .lb-empty { text-align: center; color: #ccc; padding: 40px 0; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -262,7 +286,9 @@
 
   <div class="footer">
     把这份默契分享给朋友吧<br><br>
-    <a href="?setup" style="color:#c8bebe;font-size:11px;text-decoration:none;">我是主人，设置正确答案</a>
+    <a href="?setup">我是主人，设置正确答案</a>
+    &nbsp;·&nbsp;
+    <a href="?board">查看排行榜</a>
   </div>
 </div>
 
@@ -381,7 +407,15 @@ const QUIZ = [
   var current = 0;
   var answers = {};
   var total = QUIZ.length;
+  var playerName = "";
   var isSetup = (window.location.search === "?setup");
+  var isBoard = (window.location.search === "?board");
+
+  // 排行榜模式
+  if (isBoard) {
+    showLeaderboard();
+    return;
+  }
 
   // 主人模式：换标题
   if (isSetup) {
@@ -394,6 +428,43 @@ const QUIZ = [
   var btnRow = document.getElementById("btnRow");
   var progressFill = document.getElementById("progressFill");
   var progressText = document.getElementById("progressText");
+
+  // 第一步：输入名字
+  showNameInput();
+
+  function showNameInput() {
+    card.innerHTML =
+      '<div class="name-input-wrap">' +
+      '<div style="font-size:40px;margin-bottom:12px;">👋</div>' +
+      '<div style="font-size:17px;font-weight:600;margin-bottom:6px;">先告诉我你的名字</div>' +
+      '<div style="font-size:13px;color:var(--text-light);margin-bottom:20px;">让主人知道谁来测过啦</div>' +
+      '<input id="nameInput" type="text" placeholder="输入你的名字" maxlength="10" autocomplete="off">' +
+      '</div>';
+    btnRow.innerHTML = '<button class="btn btn-next" id="btnStart" disabled>开始测试</button>';
+
+    var input = document.getElementById("nameInput");
+    var btn = document.getElementById("btnStart");
+    input.addEventListener("input", function() {
+      btn.disabled = (input.value.trim() === "");
+    });
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && input.value.trim() !== "") {
+        startQuiz();
+      }
+    });
+    btn.addEventListener("click", function() {
+      if (input.value.trim() !== "") startQuiz();
+    });
+    input.focus();
+    progressFill.style.width = "0%";
+    progressText.textContent = "0 / " + total;
+  }
+
+  function startQuiz() {
+    playerName = document.getElementById("nameInput").value.trim();
+    // 更新进度条初始显示
+    renderQuestion(0);
+  }
 
   function renderQuestion(i) {
     current = i;
@@ -554,6 +625,10 @@ const QUIZ = [
     }
 
     var pct = (score / total * 100).toFixed(0);
+
+    // 保存记录
+    saveRecord(playerName, score, grade);
+
     progressFill.style.width = "100%";
 
     // 生成每题对错明细
@@ -589,11 +664,74 @@ const QUIZ = [
     document.getElementById("btnRestart").addEventListener("click", function() {
       answers = {};
       current = 0;
-      renderQuestion(0);
+      playerName = "";
+      showNameInput();
     });
   }
 
-  renderQuestion(0);
+  function saveRecord(name, score, grade) {
+    var records = JSON.parse(localStorage.getItem("quiz_records") || "[]");
+    var now = new Date();
+    var timeStr = (now.getMonth()+1) + "/" + now.getDate() + " " +
+                  String(now.getHours()).padStart(2,"0") + ":" +
+                  String(now.getMinutes()).padStart(2,"0");
+    records.push({ name: name, score: score, grade: grade, time: timeStr });
+    // 只保留最近50条
+    if (records.length > 50) records = records.slice(-50);
+    localStorage.setItem("quiz_records", JSON.stringify(records));
+  }
+
+  function showLeaderboard() {
+    document.querySelector(".header h1").textContent = "测试排行榜";
+    document.querySelector(".header .subtitle").textContent = "谁最了解我？";
+    document.querySelector(".footer").innerHTML = '<a href="./">← 返回测试</a>';
+    progressFill.style.width = "100%";
+    progressText.textContent = "";
+
+    var records = JSON.parse(localStorage.getItem("quiz_records") || "[]");
+    // 按分数降序排列
+    records.sort(function(a, b) { return b.score - a.score; });
+
+    var html = '<div class="leaderboard">';
+    if (records.length === 0) {
+      html += '<div class="lb-empty">还没有人测过呢<br>快分享给朋友来玩吧 🎈</div>';
+    } else {
+      html += '<div style="font-size:13px;color:var(--text-light);margin-bottom:8px;text-align:center;">共 ' + records.length + ' 人参与</div>';
+      for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        var rankIcon = "";
+        if (i === 0) rankIcon = "🥇";
+        else if (i === 1) rankIcon = "🥈";
+        else if (i === 2) rankIcon = "🥉";
+        html += '<div class="lb-item">';
+        html += '<span class="lb-rank">' + (rankIcon || (i+1)) + '</span>';
+        html += '<span class="lb-name">' + escapeHtml(r.name) + '</span>';
+        html += '<span class="lb-score">' + r.score + '分</span>';
+        html += '<span class="lb-grade">' + r.grade + '</span>';
+        html += '<span class="lb-time">' + r.time + '</span>';
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+
+    card.innerHTML = html;
+    btnRow.innerHTML = '<button class="btn btn-prev" onclick="location.href=\'./\'" style="flex:1;">返回测试</button>' +
+                       '<button class="btn btn-next" id="btnClear" style="flex:1;background:#e0c0c0;">清空记录</button>';
+
+    document.getElementById("btnClear").addEventListener("click", function() {
+      if (confirm("确定要清空所有测试记录吗？")) {
+        localStorage.removeItem("quiz_records");
+        showLeaderboard();
+      }
+    });
+  }
+
+  // HTML 转义
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
 })();
 </script>
 
