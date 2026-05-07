@@ -648,6 +648,9 @@ const QUIZ = [
     }
     detailHtml += '</div>';
 
+    // 通知主人的消息
+    var shareMsg = "👋 我在「朋友默契测试」得了 " + score + " 分（" + grade + "），来自 " + playerName + " 的挑战！";
+
     card.innerHTML =
       '<div class="result-wrap">' +
       '<div class="result-emoji">' + emoji + '</div>' +
@@ -655,11 +658,34 @@ const QUIZ = [
       '<div class="result-score">答对 ' + score + ' 题 / 共 ' + total + ' 题（' + pct + '%）</div>' +
       '<div class="result-msg">' + msg + '</div>' +
       detailHtml +
-      '<button class="btn-restart" id="btnRestart" style="margin-top:16px;">再来一次</button>' +
+      '<button class="btn-restart" id="btnNotify" style="background:var(--accent);margin-top:16px;">📩 通知主人</button>' +
+      '<button class="btn-restart" id="btnRestart" style="margin-top:8px;">再来一次</button>' +
       '</div>';
 
     progressText.textContent = score + " / " + total;
     btnRow.innerHTML = "";
+
+    document.getElementById("btnNotify").addEventListener("click", function() {
+      // 在微信内置浏览器中，尝试用 JS-SDK 发送给朋友
+      if (typeof WeixinJSBridge !== "undefined") {
+        WeixinJSBridge.invoke("sendAppMessage", {
+          title: "朋友默契测试结果",
+          desc: shareMsg,
+          link: window.location.href,
+          img_url: ""
+        });
+      } else if (navigator.share) {
+        // 手机浏览器原生分享
+        navigator.share({ title: "默契测试结果", text: shareMsg, url: window.location.href }).catch(function(){});
+      } else {
+        // 复制到剪贴板
+        navigator.clipboard.writeText(shareMsg).then(function() {
+          alert("已复制！粘贴发给主人就行");
+        }).catch(function() {
+          prompt("复制这条消息发给主人：", shareMsg);
+        });
+      }
+    });
 
     document.getElementById("btnRestart").addEventListener("click", function() {
       answers = {};
