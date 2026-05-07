@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>朋友默契测试</title>
+<!-- 微信 / QQ / 朋友圈分享封面 -->
+<meta property="og:title" content="朋友默契测试">
+<meta property="og:description" content="看看你有多了解我，20道题测出你们的默契等级">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="朋友默契测试">
+<meta property="og:locale" content="zh_CN">
+<meta itemprop="name" content="朋友默契测试">
+<meta itemprop="description" content="看看你有多了解我，20道题测出你们的默契等级">
+<meta name="description" content="看看你有多了解我，20道题测出你们的默契等级">
+<style>
+  :root {
+    --bg: #fef9f4;
+    --card: #fff;
+    --primary: #d4929a;
+    --primary-light: #f7e4e7;
+    --text: #4a3f3f;
+    --text-light: #8a7e7e;
+    --accent: #e8b298;
+    --success: #8fbc8f;
+    --shadow: 0 2px 16px rgba(180, 140, 140, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 16px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 500px;
+    padding-top: 10px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .header .icon {
+    font-size: 42px;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--primary-light);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.35s ease;
+  }
+  .progress-text {
+    font-size: 13px;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 28px 22px 24px;
+    box-shadow: var(--shadow);
+    min-height: 300px;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .card.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  .card.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .question-number {
+    display: inline-block;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .question-text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border: 2px solid #f0e6e6;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    background: #fefcfc;
+  }
+  .option:hover { border-color: var(--primary-light); background: #fefafa; }
+  .option:active { transform: scale(0.98); }
+
+  .option.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  .option .dot {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 50%;
+    border: 2px solid #d4c8c8;
+    margin-right: 12px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .option.selected .dot {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+  .option.selected .dot::after {
+    content: "";
+    width: 6px; height: 6px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .btn {
+    flex: 1;
+    padding: 14px 0;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-prev {
+    background: #f5f0f0;
+    color: var(--text-light);
+  }
+  .btn-next {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-next:disabled {
+    background: #dcc4c8;
+    cursor: not-allowed;
+  }
+  .btn-submit {
+    background: var(--accent);
+    color: white;
+    font-size: 17px;
+  }
+
+  .result-wrap { text-align: center; }
+  .result-emoji { font-size: 64px; margin-bottom: 10px; }
+  .result-grade {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+  }
+  .result-score {
+    font-size: 15px;
+    color: var(--text-light);
+    margin-bottom: 16px;
+  }
+  .result-msg {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text);
+    background: var(--primary-light);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .btn-restart {
+    background: var(--primary);
+    color: white;
+    padding: 14px 40px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-restart:active { transform: scale(0.96); }
+
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: #c8bebe;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="icon">🌸</div>
+    <h1>朋友默契测试</h1>
+    <div class="subtitle">看看你有多了解我</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-text" id="progressText">1 / 10</span>
+  </div>
+
+  <div class="card" id="card"></div>
+
+  <div class="btn-row" id="btnRow"></div>
+
+  <div class="footer">
+    把这份默契分享给朋友吧<br><br>
+    <a href="?setup" style="color:#c8bebe;font-size:11px;text-decoration:none;">我是主人，设置正确答案</a>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  题目数据区 — 改题、加题、删题全在这里                             -->
+<!-- ============================================================ -->
+<script>
+const QUIZ = [
+  {
+    q: "我最喜欢的颜色是？",
+    options: ["雾霾蓝", "奶白 / 米色", "复古绿", "樱花粉"],
+    answer: 2
+  },
+  {
+    q: "周末我最可能在哪？",
+    options: ["在家窝着", "和朋友约饭", "逛公园 / 散步", "加班 / 学习"],
+    answer: 0
+  },
+  {
+    q: "我的性格是？",
+    options: ["外向活泼", "温和慢热", "霸道总裁", "社恐晚期"],
+    answer: 0
+  },
+  {
+    q: "我最爱的饮品？",
+    options: ["奶茶", "咖啡", "白开水", "果茶 / 柠檬茶"],
+    answer: 2
+  },
+  {
+    q: "朋友做什么我最受不了？",
+    options: ["迟到很久", "不回消息", "背后说坏话", "随便放鸽子"],
+    answer: 1
+  },
+  {
+    q: "我最想去旅行的地方？",
+    options: ["日本", "云南 / 大理", "欧洲", "海边就行"],
+    answer: 2
+  },
+  {
+    q: "我喜欢什么类型的音乐？",
+    options: ["R&B / 慢歌", "摇滚", "说唱", "古典 / 纯音乐"],
+    answer: 3
+  },
+  {
+    q: "我对未来的态度是？",
+    options: ["充满兴奋", "有点迷茫但努力", "完全躺平", "走一步看一步"],
+    answer: 3
+  },
+  {
+    q: "我最常熬夜是因为？",
+    options: ["打游戏", "刷视频停不下来", "想太多睡不着", "赶 deadline"],
+    answer: 2
+  },
+  {
+    q: "对我来说，朋友最重要的是？",
+    options: ["经常见面", "真诚不装", "有趣好玩", "能帮上忙"],
+    answer: 2
+  },
+  {
+    q: "我最喜欢吃什么菜系？",
+    options: ["川菜 / 火锅", "日料", "粤菜 / 清淡", "什么都爱吃"],
+    answer: 3
+  },
+  {
+    q: "我生气的时候最可能？",
+    options: ["直接发火", "不说话冷处理", "自己消化不说", "摔东西"],
+    answer: 1
+  },
+  {
+    q: "我的穿衣风格是？",
+    options: ["休闲舒服就行", "偏正式", "运动风", "看心情混搭"],
+    answer: 0
+  },
+  {
+    q: "我最喜欢的季节？",
+    options: ["春天", "夏天", "秋天", "冬天"],
+    answer: 3
+  },
+  {
+    q: "我觉得最重要的是？",
+    options: ["钱", "健康", "家人朋友", "自由"],
+    answer: 0
+  },
+  {
+    q: "我最可能养什么宠物？",
+    options: ["猫", "狗", "不养宠物", "小众宠物（仓鼠/兔子等）"],
+    answer: 2
+  },
+  {
+    q: "我的作息属于？",
+    options: ["早睡早起", "晚睡晚起", "晚睡早起被迫", "完全不规律"],
+    answer: 3
+  },
+  {
+    q: "我收到什么礼物最开心？",
+    options: ["实用的小东西", "花 / 浪漫的", "对方手写的信/卡片", "贵的不重要走心就行"],
+    answer: 3
+  },
+  {
+    q: "我面对困难时通常会？",
+    options: ["立刻找人帮忙", "自己先扛着", "逃避一会儿再说", "冷静分析解决"],
+    answer: 0
+  },
+  {
+    q: "用一句话形容我？",
+    options: ["外冷内热", "大大咧咧", "温柔细腻", "佛系随缘"],
+    answer: 1
+  }
+];</script>
+
+<!-- ============================================================ -->
+<!--  逻辑代码区                                                     -->
+<!-- ============================================================ -->
+<script>
+(function() {
+  var current = 0;
+  var answers = {};
+  var total = QUIZ.length;
+  var isSetup = (window.location.search === "?setup");
+
+  // 主人模式：换标题
+  if (isSetup) {
+    document.querySelector(".header h1").textContent = "设置正确答案";
+    document.querySelector(".header .subtitle").textContent = "按你自己的情况回答，答完生成答案";
+    document.querySelector(".footer").innerHTML = "";
+  }
+
+  var card = document.getElementById("card");
+  var btnRow = document.getElementById("btnRow");
+  var progressFill = document.getElementById("progressFill");
+  var progressText = document.getElementById("progressText");
+
+  function renderQuestion(i) {
+    current = i;
+    var q = QUIZ[i];
+    var selectedVal = answers[i];
+    var answered = answers.hasOwnProperty(i);
+
+    var html = '<span class="question-number">第 ' + (i+1) + ' 题</span>';
+    html += '<div class="question-text">' + q.q + '</div>';
+    html += '<div class="options">';
+
+    for (var oi = 0; oi < q.options.length; oi++) {
+      var cls = "option";
+      if (answered && oi === selectedVal) cls += " selected";
+      html += '<div class="' + cls + '" data-idx="' + oi + '">';
+      html += '<span class="dot"></span>';
+      html += q.options[oi];
+      html += '</div>';
+    }
+    html += '</div>';
+    card.innerHTML = html;
+
+    var opts = card.querySelectorAll(".option");
+    for (var k = 0; k < opts.length; k++) {
+      opts[k].addEventListener("click", function() {
+        var idx = parseInt(this.getAttribute("data-idx"));
+        answers[current] = idx;
+        renderQuestion(current);
+      });
+    }
+
+    updateProgress();
+    renderButtons();
+  }
+
+  function updateProgress() {
+    var cnt = Object.keys(answers).length;
+    var pct = (cnt / total * 100).toFixed(0);
+    progressFill.style.width = pct + "%";
+    progressText.textContent = cnt + " / " + total;
+  }
+
+  function renderButtons() {
+    var isFirst = (current === 0);
+    var isLast  = (current === total - 1);
+    var allDone  = Object.keys(answers).length === total;
+    var currentAnswered = answers.hasOwnProperty(current);
+
+    var html = "";
+    if (!isFirst) {
+      html += '<button class="btn btn-prev" id="btnPrev">上一题</button>';
+    } else {
+      html += '<div style="flex:1"></div>';
+    }
+
+    if (isLast) {
+      html += '<button class="btn btn-submit" id="btnSubmit" ' + (allDone ? '' : 'disabled') + '>' + (isSetup ? '生成答案' : '查看结果') + '</button>';
+    } else {
+      html += '<button class="btn btn-next" id="btnNext" ' + (currentAnswered ? '' : 'disabled') + '>下一题</button>';
+    }
+
+    btnRow.innerHTML = html;
+
+    var btnPrev = document.getElementById("btnPrev");
+    var btnNext = document.getElementById("btnNext");
+    var btnSubmit = document.getElementById("btnSubmit");
+
+    if (btnPrev) {
+      btnPrev.addEventListener("click", function() {
+        card.classList.add("fade-out");
+        setTimeout(function() {
+          renderQuestion(current - 1);
+          card.classList.remove("fade-out");
+        }, 180);
+      });
+    }
+    if (btnNext) {
+      btnNext.addEventListener("click", function() {
+        card.classList.add("fade-out");
+        setTimeout(function() {
+          renderQuestion(current + 1);
+          card.classList.remove("fade-out");
+        }, 180);
+      });
+    }
+    if (btnSubmit) {
+      btnSubmit.addEventListener("click", showResult);
+    }
+  }
+
+  function showResult() {
+    // ===== 主人模式：生成答案代码 =====
+    if (isSetup) {
+      var code = "const QUIZ = [\n";
+      for (var i = 0; i < total; i++) {
+        var q = QUIZ[i];
+        code += "  {\n";
+        code += "    q: \"" + q.q + "\",\n";
+        code += "    options: [\"" + q.options.join("\", \"") + "\"],\n";
+        code += "    answer: " + answers[i] + "\n";
+        code += "  }";
+        if (i < total - 1) code += ",";
+        code += "\n";
+      }
+      code += "];";
+
+      progressFill.style.width = "100%";
+      progressText.textContent = total + " / " + total;
+
+      card.innerHTML =
+        '<div class="result-wrap">' +
+        '<div class="result-emoji">✅</div>' +
+        '<div class="result-grade">答案已生成</div>' +
+        '<div class="result-score">下面这串代码复制后，替换文件里 QUIZ 那一段</div>' +
+        '<div style="background:#f9f5f5;border-radius:12px;padding:16px;text-align:left;font-size:12px;line-height:1.6;max-height:400px;overflow:auto;margin:12px 0;word-break:break-all;font-family:monospace;white-space:pre-wrap;">' + code.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</div>' +
+        '<button class="btn-restart" id="btnCopy" style="margin-right:8px;">复制代码</button>' +
+        '<button class="btn-restart" id="btnRestart" style="background:#c8bebe;">重新设置</button>' +
+        '</div>';
+
+      btnRow.innerHTML = "";
+
+      document.getElementById("btnCopy").addEventListener("click", function() {
+        navigator.clipboard.writeText(code).then(function() {
+          alert("已复制！去文件里找到 const QUIZ = [ 这一段，全部替换掉就行。");
+        });
+      });
+      document.getElementById("btnRestart").addEventListener("click", function() {
+        answers = {};
+        current = 0;
+        renderQuestion(0);
+      });
+      return;
+    }
+
+    // ===== 朋友模式：正常评分 =====
+    var score = 0;
+    for (var i = 0; i < total; i++) {
+      if (answers[i] === QUIZ[i].answer) score++;
+    }
+
+    var grade, emoji, msg;
+    if (score >= 18) {
+      grade = "满分知己";
+      emoji = "💎";
+      msg = "你简直是我肚子里的蛔虫！比我自己还了解我，这种朋友一辈子也就一两个。";
+    } else if (score >= 14) {
+      grade = "很懂我";
+      emoji = "🌸";
+      msg = "你真的很了解我，大部分都答对了。好朋友就是这个感觉，相处起来特别舒服。";
+    } else if (score >= 10) {
+      grade = "一般了解";
+      emoji = "🍃";
+      msg = "及格啦，不算差。以后多聊聊，你会发现我更多有趣的地方。";
+    } else {
+      grade = "不太熟悉";
+      emoji = "🌱";
+      msg = "看来我们还需要多相处相处。没关系，所有好朋友都是从陌生开始的。";
+    }
+
+    var pct = (score / total * 100).toFixed(0);
+    progressFill.style.width = "100%";
+
+    card.innerHTML =
+      '<div class="result-wrap">' +
+      '<div class="result-emoji">' + emoji + '</div>' +
+      '<div class="result-grade">' + grade + '</div>' +
+      '<div class="result-score">答对 ' + score + ' 题 / 共 ' + total + ' 题（' + pct + '%）</div>' +
+      '<div class="result-msg">' + msg + '</div>' +
+      '<button class="btn-restart" id="btnRestart">再来一次</button>' +
+      '</div>';
+
+    progressText.textContent = score + " / " + total;
+    btnRow.innerHTML = "";
+
+    document.getElementById("btnRestart").addEventListener("click", function() {
+      answers = {};
+      current = 0;
+      renderQuestion(0);
+    });
+  }
+
+  renderQuestion(0);
+})();
+</script>
+
+</body>
+</html>
