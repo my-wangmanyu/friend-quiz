@@ -556,13 +556,31 @@ const QUIZ = [
     var pct = (score / total * 100).toFixed(0);
     progressFill.style.width = "100%";
 
+    // 生成每题对错明细
+    var detailHtml = '<div style="text-align:left;margin-top:12px;">';
+    for (var i = 0; i < total; i++) {
+      var isCorrect = (answers[i] === QUIZ[i].answer);
+      var icon = isCorrect ? '✅' : '❌';
+      var myAnswer = QUIZ[i].options[answers[i]];
+      var rightAnswer = QUIZ[i].options[QUIZ[i].answer];
+      detailHtml += '<div style="padding:8px 0;border-bottom:1px solid #f5eeee;font-size:13px;line-height:1.6;">';
+      detailHtml += icon + ' <b>第' + (i+1) + '题：</b>' + QUIZ[i].q + '<br>';
+      detailHtml += '<span style="color:#999;">你的回答：</span>' + myAnswer;
+      if (!isCorrect) {
+        detailHtml += ' &nbsp;→&nbsp; <span style="color:#d4929a;">正确答案：' + rightAnswer + '</span>';
+      }
+      detailHtml += '</div>';
+    }
+    detailHtml += '</div>';
+
     card.innerHTML =
       '<div class="result-wrap">' +
       '<div class="result-emoji">' + emoji + '</div>' +
       '<div class="result-grade">' + grade + '</div>' +
       '<div class="result-score">答对 ' + score + ' 题 / 共 ' + total + ' 题（' + pct + '%）</div>' +
       '<div class="result-msg">' + msg + '</div>' +
-      '<button class="btn-restart" id="btnRestart">再来一次</button>' +
+      detailHtml +
+      '<button class="btn-restart" id="btnRestart" style="margin-top:16px;">再来一次</button>' +
       '</div>';
 
     progressText.textContent = score + " / " + total;
